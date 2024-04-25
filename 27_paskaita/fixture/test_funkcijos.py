@@ -39,10 +39,11 @@ def test_apskaiciuoti_maza_plota(mazo_ploto_duomenys):
 
 @pytest.fixture
 def mock_gauti_orus_response():
-    return {'temperatura': 20, 'miestas': 'Vilnius'}
+    return {'temperatura': 25, 'miestas': 'Vilnius'}
 
 @patch('funkcijos.gauti_orus')
 def test_apsirengti_siltai(mock_gauti_orus, mock_gauti_orus_response):
     mock_gauti_orus.return_value = mock_gauti_orus_response['temperatura']
-    assert fn.apsirengti_siltai('Vilnius') == True
+    assert fn.apsirengti_siltai('Vilnius') == False
+
 
