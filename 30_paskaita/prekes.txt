@@ -1,0 +1,4 @@
+Mazas_stalas 20.0 7 
+DarVienaSofa 236.0 2
+Suolas 25.0 1
+Lempa 21.0 8
