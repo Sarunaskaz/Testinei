@@ -1,0 +1,35 @@
+# 1. sukurkite duomenų bazę, kurioje turėtų būti šios lentelės: gydytojai, pacientai, susitikimai
+
+# 1. Gydytojai:
+    # ID (unikalus)
+    # Vardas
+    # Pavardė
+    # Specializacija
+    # Kontaktinė informacija (el. paštas)
+
+# 2. Pacientai:
+    # ID (unikalus)
+    # Vardas
+    # Pavardė
+    # Gimimo data
+    # Lytis
+    # Kontaktinė informacija (el. paštas)
+    # Gydytojo ID (susiejimas su gydytoju, pvz. šeimos gydytojas)
+
+# 3. Susitikimai:
+    # ID
+    # Paciento ID
+    # Gydytojo ID
+    # Susitikimo data ir laikas
+    # Susitikimo paskirtis/arba diagnozė
+    # Komentarai/arba pastabos
+
+# 2. Užpildykite šias lenteles duomenimis (bent 10 įrašų kiekvienai lentelei)
+
+# 3. Atlikite šias užklausas:
+
+    # 1. Visi pacientai, kurių gimimo data yra mažiau nei 1970-01-01 turėtų būti priskirti gydytojui, kurio ID yra 1
+    # 2. Raskite visus susitikimus, kurie vyksta šiandien. (rezultate norime matyti kliento vardą ir pavardę, gydytojo vardą ir pavardę ir susitikimo paskirtį)
+    # 3. Sukurkite užklausą, kuri ištrintų visus susitikimus, kurie įvyko daugiau nei 6 mėnesiai nuo šiandienos datos.
+    # 4. Parašykite užklausą, kuri rastų gydytojų vardus ir pavardes, kuriems yra priskirti pacientai, kurių susitikimo paskirtyje yra žodis "trauma"
+    # 5. Raskite visus pacientus, kurių gydytojo specializacija yra chirurgija ir susitikimo paskirtis yra operacija.
