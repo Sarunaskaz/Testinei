@@ -200,7 +200,7 @@ vyskupija = Vyskupija()
 # vyskupija.prideti_baznycia(baznycia1)
 # vyskupija.prideti_baznycia(baznycia2)
 # vyskupija.prideti_baznycia(baznycia3)
-# vyskupija.istrinti_baznycia(2000)
+vyskupija.istrinti_baznycia(1964)
 
 # print(vyskupija.baznyciu_sarasas[0].adresas)
 # print(vyskupija.baznyciu_sarasas[2].adresas)

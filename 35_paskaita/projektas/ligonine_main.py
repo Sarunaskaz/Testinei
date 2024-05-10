@@ -8,7 +8,8 @@ def main():
         print('1 - baigti darba')
         print('2-prideti gydytoja')
         print('3-prideti pacienta')
-        print('4-prideti pacienta')
+        print('4-prideti susitikima')
+        print('5-perziureti lentele')
 
         pasirinkimas = input('Iveskite pasirinkimo numeri: ')
 
@@ -34,13 +35,20 @@ def main():
             pacientas = ligonine.prideti_pacienta(vardas, pavarde, gimimoData, lytis, el_pastas, gydytojo_id)
             print(f'pacientas {pacientas.vardas} buvo pridetas')
         elif pasirinkimas == '4':
-            paciento_id = int(input('Iveskite paciento id '))
-            gydytojo_id = int(input('Iveskite gydytojo id '))
-            susitikimo_data = input('Iveskite susitikimo data ')
-            paskirtis = input('Iveskite susitikimo paskirti ')
-            komentarai = input('palikite komentara ')
-            susitikimas = ligonine.prideti_susitikima(paciento_id, gydytojo_id, susitikimo_data, paskirtis, komentarai)
-            print(f'susitikimas {susitikimas.susitikimo_data} buvo pridetas')
+             print('Iveskite susitikimo informacija')
+             paciento_id = input('Paciento_id: ')
+             gydytojo_id = input('Gydytojo_id: ')
+             susitikimo_data = input('Vizito data: ')
+             paskirtis = input('Paskirtis: ')
+             komentarai = input('Komentarai: ')
+             susitikimo_id = ligonine.prideti_susitikima(paciento_id, gydytojo_id, susitikimo_data, paskirtis, komentarai)
+             susitikimas = ligonine.gauti_susitikimo_info_pagal_id(susitikimo_id)
+             pac_vardas, gyd_vardas, data = susitikimas # unpackinam.
+             print(f'Susitikimas {gyd_vardas} {pac_vardas} {data} buvo pridetas.')
+        elif pasirinkimas == '5':
+             lentele = input('Iveskite lenteles pavadinimas: ')
+             ligonine.perziureti_irasus(lentele)
+             
         else:
             print('Pasirinkimas neteisingas bandykite dar karta! ')
 

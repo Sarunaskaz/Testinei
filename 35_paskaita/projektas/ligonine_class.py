@@ -78,8 +78,23 @@ class Ligonine:
         return susitikimas
     
     def perziureti_irasus(self, lentele):
-        self.cursor.execute('SELECT * FROM ?', (lentele,))
+        self.cursor.execute(f'SELECT * FROM {lentele} ')
         rezultattu_sarasas = self.cursor.fetchall()
         print('Irasai pagal jusu uzklausa: ')
         for rezultatas in rezultattu_sarasas:
             print(rezultatas)
+
+    def gauti_susitikimo_info_pagal_id(self,susitikimo_id):
+        self.cursor.execute('SELECT p.vardas, g.vardas, s.susitikimo_data FROM susitikimai AS s JOIN pacientai AS p USING(paciento_id) JOIN gydytojai AS g USING(gydytojo_id) WHERE susitikimo_id = ?', (susitikimo_id,))
+        rezultatas = self.cursor.fetchone()
+        return rezultatas
+    
+    def prideti_susitikima(self, paciento_id, gydytojo_id, susitikimo_data, paskirtis, komentarai):
+        susitikimas = Susitikimas(paciento_id, gydytojo_id, susitikimo_data, paskirtis, komentarai) 
+        self.cursor.execute('INSERT INTO susitikimai(paciento_id, gydytojo_id, susitikimo_data, susitikimo_paskirtis, komentarai_pastabos) VALUES (?,?,?,?,?)', (paciento_id, gydytojo_id, susitikimo_data, paskirtis, komentarai))
+        self.conn.commit()
+        # self.cursor.execute('SELECT susitikimo_id FROM susitikimai ORDER BY susitikimo_id DESC LIMIT 1')
+        # rezultatas = self.cursor.fetchone()
+        # id = rezultatas[0]
+        # return id
+        return self.cursor.lastrowid
