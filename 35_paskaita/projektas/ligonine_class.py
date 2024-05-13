@@ -98,3 +98,7 @@ class Ligonine:
         # id = rezultatas[0]
         # return id
         return self.cursor.lastrowid
+    
+    def istrinti_paciento_irasa(self, paciento_id):
+        self.cursor.execute(f'DELETE FROM pacientai WHERE paciento_id = {paciento_id}')
+        self.conn.commit()
