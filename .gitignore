@@ -162,3 +162,9 @@ cython_debug/
 /mokymai
 /txt
 training.1600000.processed.noemoticon.csv
+PetImages
+is_that_santa
+cat.jpg
+cat2.jpg
+dog.jpg
+*.jpg
