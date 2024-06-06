@@ -8,6 +8,7 @@ from sklearn.metrics import r2_score
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestRegressor
 
 
 
@@ -110,7 +111,7 @@ class Phone_prediction:
 
         X_train, X_test, y_train, y_test = train_test_split(X_poly, Y, test_size=0.2, random_state=42)
 
-        model = make_pipeline(StandardScaler(), LogisticRegression(max_iter=10000))
+        model = make_pipeline(StandardScaler(), RandomForestRegressor())
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
