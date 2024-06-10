@@ -90,10 +90,12 @@ class PhonePrediction:
         self.conn.commit()
 
 
-    def get_all_phones(self):
-        self.cursor.execute("SELECT * FROM phones")
-        return self.cursor.fetchall()
-
+    def get_all_phones(self, table):
+        self.cursor.execute(f'SELECT * FROM {table}')
+        rezultattu_sarasas = self.cursor.fetchall()
+        print('Irasai pagal jusu uzklausa: ')
+        for rezultatas in rezultattu_sarasas:
+            print(rezultatas)
 #pvz pridejimui
 # phone_prediction = PhonePrediction()
 # phone = phone_prediction.add_phone('android', 4000, 1, 64, 6, 32, 16, 3, 1)
