@@ -32,16 +32,17 @@ def main():
                 screen_size, primary_camera_rear, primary_camera_front,
                 proccesor_encoded, has_5g_encoded
             )
-            print(f'Telefonas su OS {os} buvo pridetas su prognozuojama kaina: {telefonas.price}')
+            print(f'Telefonas su OS {os} buvo pridėtas su prognozuojama kainą: {telefonas.price}')
 
         elif pasirinkimas == '3':
-            telefonu_spejimas.get_all_phones()
+            lentele = input('Įveskite lenteles pavadinimą "phones": ')
+            telefonu_spejimas.get_all_phones(lentele)
 
         elif pasirinkimas == '4':
             phone_id = int(input('Įveskite phone_id, kad ištrintumėte įrašą: '))
             telefonu_spejimas.delete_phone(phone_id)
-            print(f'telefonas su id {phone_id} buvo ištrintas')
+            print(f'Telefonas su id {phone_id} buvo ištrintas')
 
-            
+
 if __name__ == '__main__':
     main()
