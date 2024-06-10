@@ -1,138 +1,101 @@
 import sqlite3
-import datetime
-from sklearn.preprocessing import PolynomialFeatures, StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline, make_pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestRegressor
+import joblib
 
 
-
-phone = pd.read_csv('data/smartphone_cleaned_v5.csv')
-
-from sklearn.preprocessing import LabelEncoder
-
-phone = pd.read_csv('data/smartphone_v2.csv', sep=',')
-
-label_encoder = LabelEncoder()
-
-unique_brand_names = phone['brand_name'].unique()
-brand_name_mapping = {name: idx for idx, name in enumerate(unique_brand_names)}
-phone['brand_name_encoded'] = phone['brand_name'].map(brand_name_mapping)
-
-unique_model_names = phone['model'].unique()
-model_mapping = {name: idx for idx, name in enumerate(unique_model_names)}
-phone['model_encoded'] = phone['model'].map(model_mapping)
-
-unique_proccesor_names = phone['processor_brand'].unique()
-proccesor_mapping = {name: idx for idx, name in enumerate(unique_proccesor_names)}
-phone['proccesor_encoded'] = phone['processor_brand'].map(proccesor_mapping)
-
-unique_has_5g_names = phone['has_5g'].unique()
-has_5g_mapping = {name: idx for idx, name in enumerate(unique_has_5g_names)}
-phone['has_5g_encoded'] = phone['has_5g'].map(has_5g_mapping)
-
-
-
-
-phone = phone.drop(['model'], axis=1)
-phone = phone.drop(['brand_name'], axis=1)
-phone = phone.drop(['resolution'], axis=1)
-phone = phone.drop(['processor_brand'], axis=1)
-phone = phone.drop(['has_nfc'], axis=1)
-phone = phone.drop(['has_ir_blaster'], axis=1)
-phone = phone.drop(['num_cores'], axis=1)
-phone = phone.drop(['processor_speed'], axis=1)
-phone = phone.drop(['refresh_rate'], axis=1)
-phone = phone.drop(['num_rear_cameras'], axis=1)
-phone = phone.drop(['num_front_cameras'], axis=1)
-phone = phone.drop(['extended_upto'], axis=1)
-phone = phone.drop(['fast_charging'], axis=1)
-phone = phone.drop(['os'], axis=1)
-phone = phone.drop(['has_5g'], axis=1)
-
-phone = phone.dropna()
-
-phone['price']= phone['price'].fillna(phone['price'].mean())
 
 
 class Phone:
-    def __init__(self,operacion_system, screen_size, pixels_back_camera, pixels_front_camera,batery_size, fast_charger, five_G):
-        self.operacion_system = operacion_system
+    def __init__(self, os_encoded, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded, price):
+        self.os_encoded = os_encoded
+        self.battery_capacity = battery_capacity
+        self.fast_charging_available = fast_charging_available
+        self.internal_memory = internal_memory
         self.screen_size = screen_size
-        self.pixels_back_camera = pixels_back_camera
-        self.pixels_front_camera = pixels_front_camera
-        self.batery_size = batery_size
-        self.fast_charger = fast_charger
-        self.five_G = five_G
+        self.primary_camera_rear = primary_camera_rear
+        self.primary_camera_front = primary_camera_front
+        self.proccesor_encoded = proccesor_encoded
+        self.has_5g_encoded = has_5g_encoded
+        self.price = price
 
-class Phone_prediction:
+
+class PhonePrediction:
     def __init__(self):
         self.conn = sqlite3.connect('duombaze/phone_database.db')
         self.cursor = self.conn.cursor()
         self.cursor.execute(""" CREATE TABLE IF NOT EXISTS phones(
             phone_id INTEGER PRIMARY KEY,
-            operacion_system VARCHAR(50) NOT NULL,
-            screen_size INTEGER NOT NULL,
-            pixels_back_camera INTEGER NOT NULL,
-            pixels_front_camera INTEGER NOT NULL,
-            batery_size INTEGER,
-            fast_charger INTEGER NOT NULL,
-            five_G INTEGER NOT NULL)""")
+            os_encoded INTEGER NOT NULL,
+            battery_capacity INTEGER NOT NULL,
+            fast_charging_available INTEGER NOT NULL,
+            internal_memory INTEGER NOT NULL,
+            screen_size DOUBLE NOT NULL,
+            primary_camera_rear INTEGER NOT NULL,
+            primary_camera_front INTEGER NOT NULL,
+            proccesor_encoded INTEGER NOT NULL,
+            has_5g_encoded INTEGER NOT NULL,
+            price DOUBLE)""")
+        self.conn.commit()
         
-    def add_phone(self,operacion_system, screen_size, pixels_back_camera, pixels_front_camera,batery_size, fast_charger, five_G):
-        phone = Phone(operacion_system, screen_size, pixels_back_camera, pixels_front_camera,batery_size, fast_charger, five_G)
-        self.cursor.execute("INSERT INTO phones (operacion_system, screen_size, pixels_back_camera, pixels_front_camera,batery_size, fast_charger, five_G) VALUES (?, ?, ?, ?, ?,?,?)", (operacion_system, screen_size, pixels_back_camera, pixels_front_camera,batery_size, fast_charger, five_G))
+        #regression model
+        self.model = joblib.load('regression_model.joblib')
+        
+        #OS mapping
+        self.os_mapping = {
+            'android': 0,
+            'ios': 1
+
+        }
+
+        self.expected_columns = [
+            'battery_capacity', 'fast_charging_available', 'internal_memory', 'screen_size',
+            'primary_camera_rear', 'primary_camera_front', 'proccesor_encoded', 'has_5g_encoded', 'os_encoded'
+        ]
+        
+    def predict_price(self, os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded):
+        os_encoded = self.os_mapping.get(os, -1)  # Encode OS
+        
+        input_data = pd.DataFrame([{
+            'battery_capacity': battery_capacity,
+            'fast_charging_available': fast_charging_available,
+            'internal_memory': internal_memory,
+            'screen_size': screen_size,
+            'primary_camera_rear': primary_camera_rear,
+            'primary_camera_front': primary_camera_front,
+            'proccesor_encoded': proccesor_encoded,
+            'has_5g_encoded': has_5g_encoded,
+            'os_encoded': os_encoded
+        }])
+
+        # pertvarkau kolumus pagal traininimo data
+        input_data = input_data[self.expected_columns]
+
+        predicted_price = self.model.predict(input_data)[0]
+        round_predicted_price = round(predicted_price, 2)
+        
+        return round_predicted_price * 0.011 # Predictinu ir (nes data sete rupijos) paverciu i EUR
+    
+    def add_phone(self, os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded):
+        price = self.predict_price(os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded)
+        os_encoded = self.os_mapping.get(os, -1)
+        phone = Phone(os_encoded, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded, price)
+        self.cursor.execute("INSERT INTO phones (os_encoded, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            (os_encoded, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded, price))
         self.conn.commit()
         return phone
-
+    
     def delete_phone(self, phone_id):
         self.cursor.execute("DELETE FROM phones WHERE phone_id=?", (phone_id,))
-        self.conn.commit()
-
-    def update_phone(self, phone_id, operacion_system, screen_size, pixels_back_camera, pixels_front_camera, batery_size, fast_charger, five_G):
-        self.cursor.execute("""UPDATE phones SET operacion_system=?, screen_size=?, pixels_back_camera=?, pixels_front_camera=?, batery_size=?, fast_charger=?, five_G=?
-                               WHERE phone_id=?""",
-                            (operacion_system, screen_size, pixels_back_camera, pixels_front_camera, batery_size, fast_charger, five_G, phone_id))
         self.conn.commit()
 
 
     def get_all_phones(self):
         self.cursor.execute("SELECT * FROM phones")
         return self.cursor.fetchall()
-    
-    def model_train(self,X, Y):
-        polynomia = PolynomialFeatures(degree=2)
-        X_poly = polynomia.fit_transform(X)
 
-        X_train, X_test, y_train, y_test = train_test_split(X_poly, Y, test_size=0.2, random_state=42)
-
-        model = make_pipeline(StandardScaler(), RandomForestRegressor())
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        r2 = r2_score(y_test, y_pred)
-        return r2
-
-    def close(self):
-        self.conn.close()
-    
-
-
-telefonas = Phone_prediction()
-
-# telefonas.model_train(phone['price'], phone['price'])
-
-# telefonas.add_phone('android', 6, 64, 32, 1, 1, 1)
-# telefonas.delete_phone(1)
-# telefonas.update_phone(1, 'IOS', 6, 16, 8, 4500, 1, 1)
-
-# telefonas.add_phone('android', 6, 64, 32, 4000, 1, 1)
-
-
-r2_score = telefonas.model_train(phone[['price']], phone['price'])
-print(r2_score)
-
+#pvz pridejimui
+# phone_prediction = PhonePrediction()
+# phone = phone_prediction.add_phone('android', 4000, 1, 64, 6, 32, 16, 3, 1)
+# phone2 = phone_prediction.add_phone('ios', 6400, 2, 64, 6, 64, 16, 3, 1)
+# print(f"Added Phone with Predicted Price: {phone.price}\n {phone2.price}")
