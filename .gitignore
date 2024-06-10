@@ -179,3 +179,5 @@ morka2.png
 *.txt
 gan_images
 notes.txt
+.gitignore
+baigemasis/duombaze/phone_database.db
