@@ -5,7 +5,7 @@ import joblib
 
 
 
-
+# Phone klasė apibūdina telefono specifikacijas
 class Phone:
     def __init__(self, os_encoded, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded, price):
         self.os_encoded = os_encoded
@@ -19,7 +19,11 @@ class Phone:
         self.has_5g_encoded = has_5g_encoded
         self.price = price
 
-
+# PhonePrediction klasėje yra sukuriama nauja duombazė jeigu prieš tai jos nebuvo. Duombazėja aprašome stulpelius kuriuose atsiguls
+# vartotojo įvesta informacija. Taip pat joje aprašytos funkcijos leidžiančios mums: 
+# atspėti telefono kainą pagal įvestą informaciją,
+# pridėti į duombaze vartojo įvestą informaciją,
+# Ištrinti duomenis.
 class PhonePrediction:
     def __init__(self):
         self.conn = sqlite3.connect('duombaze/phone_database.db')
@@ -38,8 +42,8 @@ class PhonePrediction:
             price DOUBLE)""")
         self.conn.commit()
         
-        #regression model
-        self.model = joblib.load('regression_model.joblib')
+        #GradientBoostingRegressor regression model
+        self.model = joblib.load('RandomForestRegression_model.joblib')
         
         #OS mapping
         self.os_mapping = {
@@ -52,10 +56,13 @@ class PhonePrediction:
             'battery_capacity', 'fast_charging_available', 'internal_memory', 'screen_size',
             'primary_camera_rear', 'primary_camera_front', 'proccesor_encoded', 'has_5g_encoded', 'os_encoded'
         ]
-        
+
+
+    # Spėjomo funkcija 
     def predict_price(self, os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded):
         os_encoded = self.os_mapping.get(os, -1)  # Encode OS
         
+        #Vartotojo duomenų įvesties paruošimas pagal modelio mokinimosi duomenis
         input_data = pd.DataFrame([{
             'battery_capacity': battery_capacity,
             'fast_charging_available': fast_charging_available,
@@ -68,14 +75,16 @@ class PhonePrediction:
             'os_encoded': os_encoded
         }])
 
-        # pertvarkau kolumus pagal traininimo data
+        # pertvarkoma stulpelius pagal mokinimosi data
         input_data = input_data[self.expected_columns]
 
         predicted_price = self.model.predict(input_data)[0]
-        round_predicted_price = round(predicted_price, 2)
+        round_predicted_price = predicted_price * 0.011
         
-        return round_predicted_price * 0.011 # Predictinu ir (nes data sete rupijos) paverciu i EUR
+        return round_predicted_price.round() # atspėjam (nes data sete rupijos) ir paverčiam kainą į EUR valiutą.
     
+    #Pridėjimo funkcija, kuri prideda visą vartotojo ivestą informacija ir atspėja kainą. Kadangi modelio ruošimo metu buvo naudotas encoding
+    #Dėl to naudodamiesi mapping'u pagal vartojo ivestą skaičių yra priskiriama atitinkama reikšmė
     def add_phone(self, os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded):
         price = self.predict_price(os, battery_capacity, fast_charging_available, internal_memory, screen_size, primary_camera_rear, primary_camera_front, proccesor_encoded, has_5g_encoded)
         os_encoded = self.os_mapping.get(os, -1)
@@ -85,17 +94,20 @@ class PhonePrediction:
         self.conn.commit()
         return phone
     
+    # Ištrinimo funkcija. Vartotojas įvedęs pridėto telefono id gali ištrinti įrašą.
     def delete_phone(self, phone_id):
         self.cursor.execute("DELETE FROM phones WHERE phone_id=?", (phone_id,))
         self.conn.commit()
 
-
+    # Visų lentelėje esančių duomenų parodymas. Kreipiamasi į SQL duombaze. Vartotojas įveda lentelės pavadimą.
     def get_all_phones(self, table):
         self.cursor.execute(f'SELECT * FROM {table}')
-        rezultattu_sarasas = self.cursor.fetchall()
-        print('Irasai pagal jusu uzklausa: ')
-        for rezultatas in rezultattu_sarasas:
-            print(rezultatas)
+        rez_list = self.cursor.fetchall()
+        print('Įrašai pagal jūsų užklausą: ')
+        for rez in rez_list:
+            print(rez)
+
+
 #pvz pridejimui
 # phone_prediction = PhonePrediction()
 # phone = phone_prediction.add_phone('android', 4000, 1, 64, 6, 32, 16, 3, 1)
