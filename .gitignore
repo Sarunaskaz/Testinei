@@ -181,3 +181,5 @@ gan_images
 notes.txt
 .gitignore
 baigemasis/duombaze/phone_database.db
+baigemasis/duombaze/phone_database.db
+.gitignore

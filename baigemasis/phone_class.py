@@ -42,7 +42,7 @@ class PhonePrediction:
             price DOUBLE)""")
         self.conn.commit()
         
-        #GradientBoostingRegressor regression model
+        #RandomForestRegression regression model
         self.model = joblib.load('RandomForestRegression_model.joblib')
         
         #OS mapping
